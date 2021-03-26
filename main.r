@@ -2,7 +2,7 @@ library(ggplot2)
 library(gtools)
 setwd("~/github_repositories/vaccine-tracker")
 
-df = read.csv(file="data-2021-03-20.csv", skip=2, header=T)
+df = read.csv(file="data-2021-03-25.csv", skip=2, header=T)
 df = df[df$Date.Type == "Admin", ]
 df = df[df$Program == "US", ]
 
@@ -28,14 +28,20 @@ df = df[1:(n-5), ]
 
 july.4 = 202
 year.1 = 364
-all.adults.date = year.1
-proportion.adults = 0.8
-df[nrow(df) + 1,] = c(NA, population.over.18 * proportion.adults, all.adults.date, 1*proportion.adults)
-df$date[nrow(df)] = start.date + all.adults.date;
+
+milestone.1.date = july.4
+proportion.adults = 0.7
+df[nrow(df) + 1,] = c(NA, population.over.18 * proportion.adults, milestone.1.date, 1*proportion.adults)
+df$date[nrow(df)] = start.date + milestone.1.date;
+
+milestone.2.date = year.1
+proportion.adults = 0.9
+# df[nrow(df) + 1,] = c(NA, population.over.18 * proportion.adults, milestone.2.date, 1*proportion.adults)
+# df$date[nrow(df)] = start.date + milestone.2.date;
 
 fit <- nls(percent ~ SSlogis(days, phi1, phi2, phi3), data=df)
 
-fit.df <- data.frame(days=seq(0,all.adults.date))
+fit.df <- data.frame(days=seq(0,milestone.2.date))
 fit.df$date <- start.date + fit.df$days
 fit.df$percent <- predict(fit, new=fit.df)
 fit.df$amount <- fit.df$percent * population.over.18
@@ -48,7 +54,7 @@ for (i in 2:nrow(fit.df)) {
 ggplot(df, aes(x=days, y=amount)) +
   geom_point() +
   geom_line(data=fit.df) +
-  xlim(0, all.adults.date)
+  xlim(0, milestone.2.date)
 
 ggplot(fit.df, aes(x=date, y=delta)) + geom_line()
 
